@@ -1,0 +1,18 @@
+{
+  "order": "3d478-36e",
+  "total_price": 500,
+  "products": [
+    {
+      "product_id": "First product",
+      "description": null,
+      "quantity": 1
+    },
+    {
+      "product_id": "Second product",
+      "description": {
+    	"string": "Fragile"  
+      },
+      "quantity": 2
+    }
+  ]
+}

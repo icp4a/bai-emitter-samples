@@ -1,0 +1,15 @@
+{
+  "namespace": "com.ibm.customers",
+  "type": "record",
+  "name": "Customer",
+  "fields": [
+    {
+      "name": "company",
+      "type": "string"
+    },
+    {
+      "name": "address",
+      "type": "string"
+    }
+  ]
+}

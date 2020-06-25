@@ -1,0 +1,24 @@
+{
+  "namespace": "com.ibm.customers",
+  "type": "record",
+  "name": "Customer",
+  "doc": "Customer record",
+  "fields": [
+    {
+      "name": "company",
+      "type": "string"
+    },
+    {
+      "name": "address",
+      "type": "string"
+    },
+    {
+      "name": "shareholders",
+      "type": "int"
+    },
+    {
+      "name": "siteUrl",
+      "type": "string"
+    }
+  ]
+}

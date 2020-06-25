@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+    id 'checkstyle'
+}
+
+// load dependencies definition
+apply from: 'dependencies.gradle'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    maven {
+         url 'https://packages.confluent.io/maven/'
+    }
+}
+
+// generate jar with dependencies by default
+jar {
+    archivesBaseName = 'bai-event-emitter-samples'
+    from configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+    manifest {
+    }
+}
