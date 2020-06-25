@@ -1,0 +1,42 @@
+{
+  "name": "generic",
+  "type": "record",
+  "namespace": "com.ibm.bai",
+  "fields": [
+    {
+      "name": "order",
+      "type": "string"
+    },
+    {
+      "name": "total_price",
+      "type": "int"
+    },
+    {
+      "name": "products",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "products_record",
+          "type": "record",
+          "fields": [
+            {
+              "name": "product_id",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "int"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

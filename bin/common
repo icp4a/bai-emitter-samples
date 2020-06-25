@@ -1,0 +1,18 @@
+#!/bin/bash
+
+JAR="build/libs/bai-event-emitter-samples.jar"
+
+function check-var-defined() {
+  if [[ -z $2 ]]; then
+    echo "Error: variables $1 must be defined."
+    echo "Check ${ENV_FILE} for missing value(s)."
+    echo "Exiting."
+    exit 1
+  fi
+  if [[ $1 == *"_PASSWORD"* ]]; then
+    echo "$1 is **********"
+  else
+    echo "$1 is $2"
+  fi
+  return 0
+}

@@ -1,0 +1,13 @@
+{
+  "namespace": "com.ibm.employees",
+  "doc": "this is the employee schema",
+  "type": "record",
+  "name": "EmployeeBetterDefined",
+    "fields": [
+      {"name": "fName", "type": "string"},
+      {"name": "lName", "type": "string"},
+      {"name": "address",  "type": "string"},
+      {"name": "age",  "type": "int"},
+      {"name": "phoneNumber", "type": "string"}
+  ]
+}

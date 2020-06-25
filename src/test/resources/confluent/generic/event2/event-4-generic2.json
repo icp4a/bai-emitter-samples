@@ -1,0 +1,13 @@
+{
+  "order": "4d478-46e",
+  "total_price": 700,
+  "products": [
+    {
+      "product_id": "Third product",
+      "description": {
+    	"string": "Heavy"  
+      },
+      "quantity": 3
+    }
+  ]
+}
