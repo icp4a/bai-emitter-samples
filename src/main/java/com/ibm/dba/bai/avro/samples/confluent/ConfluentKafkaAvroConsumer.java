@@ -68,7 +68,6 @@ public class ConfluentKafkaAvroConsumer {
       props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
       props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
       props.put(ConsumerConfig.GROUP_ID_CONFIG, "group1");
-
       props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, getOption(cmdLine, REGISTRY_URL_ARG));
       props.put(AbstractKafkaAvroSerDeConfig.AUTO_REGISTER_SCHEMAS, false);
       // considering identical ssl truststore settings for both kafka server and

@@ -246,9 +246,11 @@ public class ConfluentAvroRegistry extends BaseSample {
       Path schemaPath = Paths.get(schemaMappings.getProperty(subject));
       if (!subject.isEmpty() && !schemaPath.toString().isEmpty() && Files.exists(schemaPath)) {
         StringBuilder content = new StringBuilder();
+        // confluent specific
         content.append("{ \"schema\" : \"");
         Files.lines(schemaPath).forEach(line -> content.append(line.replaceAll("\"", "\\\\\"")).append('\n'));
         content.append("\"}");
+        // end of confluent specific
         rtn.put(subject, content.toString());
       }
     }
@@ -284,7 +286,7 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return null;
     }
-    schemaSubject = schemaSubject.endsWith("-value") ? schemaSubject : schemaSubject + "-value";
+    schemaSubject = getConfluentSubject(schemaSubject);
     Request request = new Request.Builder().post(RequestBody.create(jsonSchema, AVRO_JSON_MEDIA_TYPE))
         .url(avroEndpoint + "/subjects/" + schemaSubject + "/versions").build();
     String result = client.getHttpClient().newCall(request).execute().body().string();
@@ -304,6 +306,9 @@ public class ConfluentAvroRegistry extends BaseSample {
    * @throws IOException if any error occurs.
    */
   public String checkRegistered(String schemaSubject, String jsonSchema) throws IOException {
+
+    schemaSubject = getConfluentSubject(schemaSubject);
+
     Request request = new Request.Builder().post(RequestBody.create(jsonSchema, AVRO_JSON_MEDIA_TYPE))
         .url(avroEndpoint + "/subjects/" + schemaSubject).build();
     String result = client.newCall(request).execute().body().string();
@@ -354,6 +359,7 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return;
     }
+    subject = getConfluentSubject(subject);
     String result = client.sendRequest(avroEndpoint + "/subjects/" + subject + "/versions/1");
     System.out.println("First version registered under subject " + subject + " is: ");
     printResult(result);
@@ -405,6 +411,7 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return null;
     }
+    subject = getConfluentSubject(subject);
     String result = client.sendRequest(avroEndpoint + "/subjects/" + subject + "/versions/latest");
     System.out.println("Latest version registered under subject " + subject + " is: ");
     printResult(result);
@@ -436,6 +443,8 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return;
     }
+    schemaSubject = getConfluentSubject(schemaSubject);
+
     Request request = new Request.Builder().post(RequestBody.create(jsonSchemaToTest, AVRO_JSON_MEDIA_TYPE))
         .url(avroEndpoint + "/compatibility/subjects/" + schemaSubject + "/versions/" + versionID).build();
     String result = client.newCall(request).execute().body().string();
@@ -483,6 +492,8 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return;
     }
+    subject = getConfluentSubject(subject);
+
     Request request = new Request.Builder()
         .put(RequestBody.create("{\"compatibility\": \"" + compatibility + "\"}", AVRO_JSON_MEDIA_TYPE))
         .url(avroEndpoint + "/config/" + subject).build();
@@ -534,6 +545,7 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (avroEndpoint == null) {
       return;
     }
+    subject = getConfluentSubject(subject);
     Request request = new Request.Builder().delete().url(avroEndpoint + "/subjects/" + subject + "/versions/" + version)
         .build();
     String result = client.newCall(request).execute().body().string();
@@ -562,14 +574,20 @@ public class ConfluentAvroRegistry extends BaseSample {
     if (client == null) {
       return null;
     }
+    subject = getConfluentSubject(subject);
+
     String result = client.sendRequest(avroEndpoint + "/subjects/" + subject + "/versions/latest/schema");
     return result;
+  }
+
+  private String getConfluentSubject(String schemaSubject) {
+    return schemaSubject.endsWith("-value") ? schemaSubject : schemaSubject + "-value";
   }
 
   /**
    * Converts JSON result string coming from a REST api response to a Java object.
    */
-  private <T> T parseResultAs(String jsonResult, Class<T> type) {
+  private static <T> T parseResultAs(String jsonResult, Class<T> type) {
     Object res = Json.parseJson(jsonResult);
     return type.isInstance(res) ? type.cast(res) : null;
   }

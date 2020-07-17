@@ -27,7 +27,6 @@ import base.BaseTest;
 import com.ibm.dba.bai.avro.samples.confluent.ConfluentAvro;
 import com.ibm.dba.bai.avro.samples.confluent.ConfluentAvroRegistry;
 import com.ibm.dba.bai.avro.samples.confluent.ConfluentKafkaAvroConsumer;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 public class ConfluentRegistryTests extends BaseTest {
-  private boolean serverEnabled = false;
+  private static boolean serverEnabled = false;
   private static final String Employee_SCHEMA = "{" + " \"schema\": \"" + " {"
       + " \\\"namespace\\\": \\\"com.ibm.employees\\\"," + " \\\"type\\\": \\\"record\\\"," + " \\\"name\\\": \\\"Employee\\\","
       + " \\\"fields\\\": [" + " {\\\"name\\\": \\\"fName\\\", \\\"type\\\": \\\"string\\\"},"
@@ -64,6 +63,7 @@ public class ConfluentRegistryTests extends BaseTest {
     BASIC_SCHEMA_V1 = testSchemasResources.getProperty("BASIC_SCHEMA_V1");
     BASIC_SCHEMA_V2 = testSchemasResources.getProperty("BASIC_SCHEMA_V2");
     BASIC_SCHEMA_V3 = testSchemasResources.getProperty("BASIC_SCHEMA_V3");
+    testServerEnabled();
   }
 
   /** Basic sample schema version 1. */
@@ -96,23 +96,8 @@ public class ConfluentRegistryTests extends BaseTest {
       "muchlessbasic-employee"
   };
 
-  public boolean isServerEnabled() {
-    return this.serverEnabled;
-  }
-
-  @Before
-  public void testServerEnabled() {
-    try {
-      // purging the registry
-      getRegistry(new String[] { "--" + REGISTRY_URL_ARG + "=" + getRegistryEndpoint(),
-          "--" + KAFKA_USERNAME_ARG + "=" + getRegistryUser(), "--" + KAFKA_PASSWORD_ARG + "=" + getRegistryPassword(),
-          "--" + PURGE_ARG });
-
-      this.serverEnabled = true;
-    } catch (Exception ex) {
-      System.out.println("No registry server enabled. Disabling tests");
-      this.serverEnabled = false;
-    }
+  public static boolean isServerEnabled() {
+    return serverEnabled;
   }
 
   @Test
@@ -200,24 +185,33 @@ public class ConfluentRegistryTests extends BaseTest {
     // registering additional schemas
     System.out.println("BASIC_SCHEMA_SUBJECT = " + BASIC_SCHEMA_SUBJECT + ", BASIC_SCHEMA_V1 = " + BASIC_SCHEMA_V1);
 
-    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readFile(BASIC_SCHEMA_V1));
-    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readFile(BASIC_SCHEMA_V2));
-    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readFile(BASIC_SCHEMA_V3));
+    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readConfluentEmbeddedSchemaFile(BASIC_SCHEMA_V1));
+    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readConfluentEmbeddedSchemaFile(BASIC_SCHEMA_V2));
+    registry.registerNewSchemaVersion(BASIC_SCHEMA_SUBJECT, readConfluentEmbeddedSchemaFile(BASIC_SCHEMA_V3));
     //
-    registry.checkRegistered(BASIC_SCHEMA_SUBJECT, BASIC_SCHEMA_V3);
+    registry.checkRegistered(BASIC_SCHEMA_SUBJECT, readConfluentEmbeddedSchemaFile(BASIC_SCHEMA_V3));
     registry.showFirstVersionOf(BASIC_SCHEMA_SUBJECT);
     registry.showLatestVersionOf(BASIC_SCHEMA_SUBJECT);
     registry.showSchemaById(1);
     registry.showCurrentConfig();
-    registry.testCompatibility(BASIC_SCHEMA_SUBJECT, BASIC_SCHEMA_V1);
+    registry.testCompatibility(BASIC_SCHEMA_SUBJECT, readConfluentEmbeddedSchemaFile(BASIC_SCHEMA_V1));
     registry.setDefaultTopLevelCompatibility(ConfluentAvroRegistry.Compatibility.none);
     registry.setCompatibilityForSubject(BASIC_SCHEMA_SUBJECT, ConfluentAvroRegistry.Compatibility.full);
   }
 
-  private String readFile(final String filePath) throws Exception {
+  private String readConfluentEmbeddedSchemaFile(final String filePath) throws Exception {
     Path schemaPath = Paths.get(filePath);
     StringBuilder content = new StringBuilder();
-    Files.lines(schemaPath).forEach(line -> content.append(line).append('\n'));
+    content.append("{ \"schema\" : \"");
+    Files.lines(schemaPath).forEach(line -> content.append(line.replaceAll("\"", "\\\\\"")));
+    content.append("\"}");
+    return content.toString();
+  }
+
+  private String readNormalSchemaFile(final String filePath) throws Exception {
+    Path schemaPath = Paths.get(filePath);
+    StringBuilder content = new StringBuilder();
+    Files.lines(schemaPath).forEach(line -> content.append(line));
     return content.toString();
   }
 
@@ -304,19 +298,33 @@ public class ConfluentRegistryTests extends BaseTest {
     return rtn;
   }
 
-  private String getRegistryUser() {
+  private static String getRegistryUser() {
     return avroRegistryResources.getProperty(KAFKA_USERNAME_ARG);
   }
 
-  private String getRegistryPassword() {
+  private static String getRegistryPassword() {
     return avroRegistryResources.getProperty(KAFKA_PASSWORD_ARG);
   }
 
-  private String getRegistryEndpoint() {
+  private static String getRegistryEndpoint() {
     return avroRegistryResources.getProperty(REGISTRY_URL_ARG);
   }
 
-  private ConfluentAvroRegistry getRegistry(String... args) throws Exception {
+  private static void testServerEnabled() {
+    try {
+      // purging the registry
+      getRegistry(new String[] { "--" + REGISTRY_URL_ARG + "=" + getRegistryEndpoint(),
+          "--" + KAFKA_USERNAME_ARG + "=" + getRegistryUser(), "--" + KAFKA_PASSWORD_ARG + "=" + getRegistryPassword(),
+          "--" + PURGE_ARG });
+
+      serverEnabled = true;
+    } catch (Exception ex) {
+      System.out.println("No registry server enabled. Disabling tests");
+      serverEnabled = false;
+    }
+  }
+
+  private static ConfluentAvroRegistry getRegistry(String... args) throws Exception {
     ConfluentAvroRegistry registry = new ConfluentAvroRegistry(args);
     assertTrue(registry.initialize());
     registry.initRegistryState();
