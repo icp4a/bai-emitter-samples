@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class BaseTest {
-  public static final String AVRO_SAMPLE_JAR_NAME = "bai-emitter-samples.jar";
+  public static final String AVRO_SAMPLE_JAR_NAME = "bai-event-emitter-samples.jar";
 
   /**
    * Launches a system command based on the provided strings array.

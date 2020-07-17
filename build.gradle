@@ -18,8 +18,20 @@ repositories {
 // generate jar with dependencies by default
 jar {
     archivesBaseName = 'bai-event-emitter-samples'
-    from configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+    def jarSet = new java.util.HashSet()
+    from configurations.compileClasspath.collect {
+        if (it.isDirectory()) {
+            return it
+        }
+        // to avoid adding the same jars twice
+        if (!jarSet.contains(it.name)) {
+            jarSet.add(it.name)
+            return zipTree(it)
+        }
+        return null
+    }
+    exclude ('META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA', '**/*.jar', '**/*.jnilib'
+        , '**/*.so', '**/*.dll')
     manifest {
     }
 }

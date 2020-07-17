@@ -1,9 +1,0 @@
-# Created by .ignore support plugin (hsz.mobi)
-/build/
-/.gradle/
-/.idea/
-/out/
-.project
-.classpath
-.settings
-/.checkstyle

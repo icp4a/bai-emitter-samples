@@ -21,6 +21,7 @@ import static com.ibm.dba.bai.avro.samples.CommandLineConstants.SCHEMA_VALUE_ARG
 import static com.ibm.dba.bai.avro.samples.CommandLineConstants.TOPIC_ARG;
 import static com.ibm.dba.bai.avro.samples.KafkaAvroProducerCommon.jsonToAvro;
 import static com.ibm.dba.bai.avro.samples.KafkaAvroProducerCommon.jsonToAvroBinary;
+import static com.ibm.dba.bai.avro.samples.KafkaAvroProducerCommon.readStringContent;
 import static com.ibm.dba.bai.avro.samples.KafkaConstants.CONFLUENT_TRUSTORE_LOCATION_CONFIG;
 import static com.ibm.dba.bai.avro.samples.KafkaConstants.CONFLUENT_TRUSTORE_PASSWORD_CONFIG;
 import static com.ibm.dba.bai.avro.samples.KafkaConstants.CONFLUENT_TRUSTORE_TYPE_CONFIG;
@@ -39,10 +40,6 @@ import org.apache.kafka.common.header.Header;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -168,31 +165,6 @@ public class ConfluentKafkaAvroProducer {
     rtn.addOption(null, HELP_ARG, false, "--" + HELP_ARG + ": Optional, prints this help " + "message.");
 
     return rtn;
-  }
-
-  /**
-   * Read a string content from the specified source.
-   * @param contentSource  if starting with a '@', then it is considered as a file path
-   *     and the content is read from this file, otherwise it is considered as the inlined content.
-   * @return the content as a string.
-   * @throws IOException if any I/O error occurs.
-   */
-  private static String readStringContent(String contentSource) throws IOException {
-    if (contentSource == null) {
-      throw new IllegalArgumentException("the event to send was not specified");
-    }
-    // if starting with a '@', then the content source is a file path
-    if (contentSource.startsWith("@")) {
-      Path path = Paths.get(contentSource.substring(1));
-      if (!Files.exists(path)) {
-        throw new IllegalArgumentException("the content source \"" + contentSource + "\" points to a non exisiting file");
-      }
-      StringBuilder event = new StringBuilder();
-      Files.lines(path).forEach(line -> event.append(line).append('\n'));
-      return event.toString();
-    }
-    // otherwise the event source is the inline event
-    return contentSource;
   }
 
   static String getOption(CommandLine cmdLine, String name) throws IllegalArgumentException {

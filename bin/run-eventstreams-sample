@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+SDIR=$(dirname $0)
+HOME_DIR=$(cd ${SDIR}/.. && pwd)
+ENV_FILE="${HOME_DIR}/eventstreams.config"
+
+source ${SDIR}/common
+source ${ENV_FILE}
+
+function check-all-vars-defined() {
+
+  check-var-defined "EVENT_STREAMS_PROPERTIES" ${EVENT_STREAMS_PROPERTIES}
+  check-var-defined "KAFKA_CLIENT_PROPERTIES" ${KAFKA_CLIENT_PROPERTIES}
+  check-var-defined "TOPIC" ${TOPIC}
+  check-var-defined "EVENT" ${EVENT}
+  check-var-defined "SCHEMA_NAME" ${SCHEMA_NAME}
+  check-var-defined "SCHEMA_VERSION" ${SCHEMA_VERSION}
+
+}
+
+check-all-vars-defined
+
+if [[ ${BINARY_EMISSION} == "true" ]]; then
+  java -cp ${JAR} \
+  com.ibm.dba.bai.avro.samples.eventstream.EventStreamAvro \
+  --kafka-client-props=${KAFKA_CLIENT_PROPERTIES} \
+  --eventstream-props=${EVENT_STREAMS_PROPERTIES} \
+  --event=${EVENT} \
+  --topic=${TOPIC} \
+  --schema-name=${SCHEMA_NAME} \
+  --schema-version=${SCHEMA_VERSION} \
+  --binary
+else
+  java -cp ${JAR} \
+  com.ibm.dba.bai.avro.samples.eventstream.EventStreamAvro \
+  --kafka-client-props=${KAFKA_CLIENT_PROPERTIES} \
+  --eventstream-props=${EVENT_STREAMS_PROPERTIES} \
+  --event=${EVENT} \
+  --topic=${TOPIC} \
+  --schema-name=${SCHEMA_NAME} \
+  --schema-version=${SCHEMA_VERSION}
+fi

@@ -23,10 +23,23 @@ For more information about such configuration, see the
   - [Schema example](#schema-example)
   - [Event example](#event-example)
   - [Running the sample](#running-the-sample)
+    - [Example output](#example-output)
   - [Java code to register a schema](#java-code-to-register-a-schema)
   - [Java code to send an event](#java-code-to-send-an-event)
+    - [Get a schema from the registry](#get-a-schema-from-the-registry)
+    - [Convert the event JSON payload to binary representation by using a schema](#convert-the-event-json-payload-to-binary-representation-by-using-a-schema)
+    - [Send an event as a binary payload](#send-an-event-as-a-binary-payload)
+- [Event Streams](#event-streams)
+  - [Avro schema example](#avro-schema-example)
+  - [Corresponding event example](#corresponding-event-example)
+  - [Running the Event Streams sample](#running-the-event-streams-sample)
+    - [Example output with Event Streams](#example-output-with-event-streams)
+  - [Procedure to register a schema](#procedure-to-register-a-schema)
+  - [Java code to send an event with Event Streams](#java-code-to-send-an-event-with-event-streams)
+    - [Convert the event JSON payload to binary representation by using a schema with Event Streams](#convert-the-event-json-payload-to-binary-representation-by-using-a-schema-with-event-streams)
+    - [Send an event as a binary payload with the Event Streams APIs](#send-an-event-as-a-binary-payload-with-the-event-streams-api)
 
-<!-- END doctoc generatedd TOC please keep comment here to allow auto update -->
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## How to build the samples
 
@@ -133,11 +146,11 @@ You can find the corresponding file [here](src/test/resources/avro-sample-event.
 
 1. Start Business Automation Insights for a server.
 2. Edit the [confluent.config](confluent.config) file.
-  a - Set the topic name: `TOPIC=CUSTOMER_V1`
-  b - Set the Kafka credentials: `KAFKA_USERNAME=<kafka_user>` and `KAFKA_PASSWORD=<kafka_password>`
-  c - Set the event source file: `EVENT=@src/test/resources/avro-sample-event.json`
-  d - Set the schemas configuration file: `@./src/test/resources/confluent/TestSchemas.properties`
-  e - Set the path to a Kafka security properties file:
+    - Set the topic name: `TOPIC=CUSTOMER_V1`
+    - Set the Kafka credentials: `KAFKA_USERNAME=<kafka_user>` and `KAFKA_PASSWORD=<kafka_password>`
+    - Set the event source file: `EVENT=@src/test/resources/avro-sample-event.json`
+    - Set the schemas configuration file: `@./src/test/resources/confluent/TestSchemas.properties`
+    - Set the path to a Kafka security properties file:
     `KAFKA_SECURITY_PROPERTIES=src/test/resources/confluent/KafkaAvroProducer.properties`
 3. Edit the Kafka security properties file, example:
   [kafka-security.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
@@ -279,3 +292,182 @@ producer.send(record);
 ```
 
 You can find this code in [ConfluentKafkaAvroProducer](./src/main/java/com/ibm/dba/bai/avro/samples/confluent/ConfluentKafkaAvroProducer.java).
+
+## Event Streams
+
+### Avro schema example
+
+A schema is a structure in JSON format which is generally located in a `.avsc` file. Here is an example:
+
+```json
+{
+  "name": "generic",
+  "type": "record",
+  "namespace": "com.ibm.bai",
+  "fields": [
+    {
+      "name": "order",
+      "type": "string"
+    },
+    {
+      "name": "total_price",
+      "type": "int"
+    },
+    {
+      "name": "products",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "products_record",
+          "type": "record",
+          "fields": [
+            {
+              "name": "product_id",
+              "type": "string"
+            },
+            {
+              "name": "description",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "int"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+```
+
+You can also find this schema [here](src/test/resources/eventstream/generic-v1.0.0.avsc).
+
+The Avro schema must be registered in an Avro registry. It is used to validate and encode events.
+For more information, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
+
+### Corresponding event example
+
+The following event complies with the Avro schema that is presented in the previous section:
+
+```json
+{
+  "order": "13d478-36e",
+  "total_price": 500,
+  "products": [
+    {
+      "product_id": "First product",
+      "description": null,
+      "quantity": 1
+    },
+    {
+      "product_id": "Second product",
+      "description": {
+        "string": "Fragile"
+      },
+      "quantity": 2
+    }
+  ]
+}
+```
+
+You can find the corresponding file [here](src/test/resources/eventstream/generic-event.json).
+
+### Running the Event Streams sample
+
+1. Ensure that IBM Business Automation Insights is installed and IBM Event Streams is configured.
+1. Edit the [eventstreams.config](eventstreams.config) file.
+    - Set the topic name: `TOPIC=bai-ingress`
+    - Set the event source file: `EVENT=@src/test/resources/eventstream/generic-event.json`
+    - Set the path to a Kafka client properties file:
+    `KAFKA_CLIENT_PROPERTIES=src/test/resources/eventstream/kafkaProducer.properties`
+    - Set the path to an Event Streams configuration properties file:
+    `EVENT_STREAMS_PROPERTIES=src/test/resources/eventstream/eventStream.properties`
+    - Set the schema name and version, using the same values as for the
+    [registered schema](#procedure-to-register-a-schema), as decribed in the next section:
+    `SCHEMA_NAME=generic` and `SCHEMA_VERSION=1.0.0`
+
+1. Edit the Kafka client properties file, example: [kafka-client-config.properties](./src/test/resources/eventstream/kafkaProducer.properties)
+1. Edit the Event Streams configuration properties file, example: [eventstreams-config.properties](./src/test/resources/eventstream/eventStream.properties)
+1. Compile the sample: `./gradlew clean jar`
+1. Run the sample: `bin/run-eventstreams-sample`. This produces an output similar to [this example output](#example-output-with-event-streams)
+1. Check that the Elasticsearch index `bai` is created in the Event Streams environment:
+
+  ```sh
+  export ES_USER=admin
+  export ES_PASSWORD=passw0rd
+  export ES_CLIENT_POD=$(kubectl get pods -o custom-columns=Name:.metadata.name --no-headers --selector=chart=ibm-dba-ek,role=client)
+  export ES_URL=https://localhost:9200
+  kubectl exec -it ${ES_CLIENT_POD} -- curl -u ${ES_USER}:${ES_PASSWORD} -k ${ES_URL}/_cat/indices/bai?h=index,docs.count\&v
+  ```
+
+#### Example output with Event Streams
+
+```text
+Connecting to the schema registry
+Retrieving the schema with name = generic and version = 1.0.0
+Found a schema in the registry: {"type":"record","name":"generic","namespace":"com.ibm.bai","fields":[{"name":"order","type":"string"},{"name":"total_price","type":"int"},{"name":"products","type":{"type":"array","items":{"type":"record","name":"products_record","fields":[{"name":"product_id","type":"string"},{"name":"description","type":["string","null"]},{"name":"quantity","type":"int"}]}}}]}
+Sent event: { "order": "13d478-36e", "total_price": 500, "products":
+  [
+    { "product_id": "First product", "description": null, "quantity": 1 },
+    { "product_id": "Second product", "description": { "string": "Fragile" }, "quantity": 2 }
+  ]
+}
+Kafka consumer listening for messages on topic bai-ingress
+Received a message: offset: 0, partition: 22, key: null, value: {"order": "13d478-36e", "total_price": 500, "products":
+[{"product_id": "First product", "description": null, "quantity": 1}, {"product_id": "Second product", "description":
+"Fragile", "quantity": 2}]}
+```
+
+### Procedure to register a schema
+
+Follow the procedure described in the
+[IBM Business Automation Insights Knowledge Center](https://www.ibm.com/supportknowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_proc.html).
+You must ensure that the name and version of the registered schema match exactly those configured in the
+[previous section](#running-the-event-streams-sample).
+
+### Java code to send an event with Event Streams
+
+You send an event in two steps: convert the event to binary, send this binary payload.
+
+#### Convert the event JSON payload to binary representation by using a schema with Event Streams
+
+```java
+DatumReader<Object> reader = new SpecificDatumReader<>(schema);
+DecoderFactory decoderFactory = DecoderFactory.get();
+Decoder decoder = decoderFactory.jsonDecoder(schema, jsonEvent);
+Object encodedMessage = reader.read(null, decoder);
+if (schema.getType().equals(Schema.Type.STRING)) {
+  encodedMessage = ((Utf8) object).toString();
+}
+```
+
+You can find this code in
+[KafkaAvroProducerCommon](./src/main/java/com/ibm/dba/bai/avro/samples/KafkaAvroProducerCommon.java)
+in the sample code.
+
+#### Send an event as a binary payload with the Event Streams API
+
+```java
+Properties props = ....;
+// specify BINARY encoding
+pros.put("com.ibm.eventstreams.schemaregistry.encoding", "BINARY");
+
+try (KafkaProducer<String, Object> producer = new KafkaProducer<>(props)) {
+  Schema schema = ...;
+  Object encodedMessage = jsonToAvro(this.event, schemaValue);
+
+  // Prepare the record, adding the Schema Registry headers
+  ProducerRecord<String, Object> record = new ProducerRecord<>(topic, encodedMessage);
+  record.headers().add(SchemaRegistryConfig.HEADER_MSG_SCHEMA_ID, schema.getIdAsBytes());
+  record.headers().add(SchemaRegistryConfig.HEADER_MSG_SCHEMA_VERSION, schema.getVersionAsBytes());
+
+  // Send the record to Kafka
+  producer.send(producerRecord);
+}
+```
+
+You can find this code in [EventStreamProducer](./src/main/java/com/ibm/dba/bai/avro/samples/eventstream/EventStreamProducer.java).

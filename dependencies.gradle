@@ -1,33 +1,29 @@
 // This gradle file defines the dependencies of the samples.
 
-// IBM event streams jar
-ext {
-    eventStreamsJar = 'event-streams-serdes-2020.2.1.jar'
+repositories {
+    // "fake" ivy repository to enable download of Eventstreams dependencies zip file when needed
+    ivy {
+        url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/eventstreams/'
+        patternLayout {
+            artifact '/[organisation]/[module]-[revision].zip'
+        }
+        metadataSources { artifact() }
+    }
 }
 
 dependencies {
-
-    implementation fileTree(dir: 'internal/libs', include: eventStreamsJar)
-    runtimeOnly fileTree(dir: 'internal/libs', include: eventStreamsJar)
+    // public download URL for Eventstreams dependencies zip file:
+    // https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/eventstreams/java-dependencies/dependencies-2.0.0-java.zip
+    implementation group: 'java-dependencies', name: 'dependencies', version: '2.0.0-java'
+    //def libDir = file("internal/libs")
+    implementation fileTree(dir: file("internal/libs"), include: '*.jar')
     def avroSerializerVersion = '5.4.1'
     implementation 'io.confluent:kafka-avro-serializer:'+ avroSerializerVersion
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.4.1'
-    // https://mvnrepository.com/artifact/org.apache.kafka/kafka
     implementation group: 'org.apache.kafka', name: 'kafka_2.12', version: '5.4.1-ccs'
     implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    // event stream dependencies from event-stream-serdes-2020.2.1.jar pom.xml examination
-    implementation group: 'org.apache.kafka', name: 'kafka_2.12', version: '2.3.1'
-    implementation group: 'org.apache.avro', name: 'avro', version: '1.9.1'
-    implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-    implementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.27'
-    implementation group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.27'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.10.2'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
-    implementation group: 'com.fasterxml.jackson.jaxrs', name: 'jackson-jaxrs-json-provider', version: '2.10.2'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.2'
-    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.2'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.9.0'
+    // set env var LOG_LEVEL=<level> for log4j logging with Kafka clients
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.9.0'
 
     testImplementation group: 'io.cucumber', name: 'cucumber-core', version: '4.2.2'
     testImplementation group: 'io.cucumber', name: 'cucumber-java8', version: '4.2.2'
@@ -36,6 +32,21 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.25.1'
     testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.10.6'
     testImplementation group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.1'
+}
 
-    testImplementation fileTree(dir: 'libs', include: eventStreamsJar)
+task unzipEventStreams() {
+  doFirst{
+    // retrieve the path to the Eventstreams dependencies zip
+    def zipPath = project.configurations.compileClasspath.find { it.name.contains("dependencies") }
+    def libDir = new File("internal/libs")
+    libDir.mkdirs()
+    copy {
+        from zipTree(zipPath)
+        into libDir
+    }
+  }
+}
+
+compileJava {
+    dependsOn unzipEventStreams
 }
