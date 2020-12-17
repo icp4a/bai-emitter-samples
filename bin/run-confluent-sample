@@ -10,40 +10,29 @@ source ${ENV_FILE}
 function check-all-vars-defined() {
 
   check-var-defined "KAFKA_SECURITY_PROPERTIES" ${KAFKA_SECURITY_PROPERTIES}
-  check-var-defined "REGISTRY_URL" ${REGISTRY_URL}
-  check-var-defined "SCHEMAS" ${SCHEMAS}
+  check-var-defined "MANAGEMENT_URL" ${MANAGEMENT_URL}
+  check-var-defined "SCHEMA" ${SCHEMA}
   check-var-defined "KAFKA_USERNAME" ${KAFKA_USERNAME}
   check-var-defined "KAFKA_PASSWORD" ${KAFKA_PASSWORD}
+  check-var-defined "MANAGEMENT_USERNAME" ${MANAGEMENT_USERNAME}
+  check-var-defined "MANAGEMENT_PASSWORD" ${MANAGEMENT_PASSWORD}
   check-var-defined "TOPIC" ${TOPIC}
   check-var-defined "EVENT" ${EVENT}
+  check-var-defined "REGISTRY_URL" ${REGISTRY_URL}
 
 }
 
 check-all-vars-defined
 
-SUBJECT="${TOPIC}-value"
-
-if [[ ${BINARY_EMISSION} == "true" ]]; then
-  java -cp ${JAR} \
-  com.ibm.dba.bai.avro.samples.confluent.ConfluentAvro \
-  --schemas=${SCHEMAS} \
-  --registry-url=${REGISTRY_URL} \
-  --kafka-username=${KAFKA_USERNAME} \
-  --kafka-password=${KAFKA_PASSWORD} \
-  --subject=${SUBJECT} \
-  --kafka-security-properties=${KAFKA_SECURITY_PROPERTIES} \
-  --event=${EVENT} \
-  --binary \
-  --purge
-else
-  java -cp ${JAR} \
-  com.ibm.dba.bai.avro.samples.confluent.ConfluentAvro \
-  --schemas=${SCHEMAS} \
-  --registry-url=${REGISTRY_URL} \
-  --kafka-username=${KAFKA_USERNAME} \
-  --kafka-password=${KAFKA_PASSWORD} \
-  --subject=${SUBJECT} \
-  --kafka-security-properties=${KAFKA_SECURITY_PROPERTIES} \
-  --event=${EVENT} \
-  --purge
-fi
+java -cp ${JAR} \
+com.ibm.dba.bai.avro.samples.confluent.ConfluentAvro \
+--schema=${SCHEMA} \
+--management-url=${MANAGEMENT_URL} \
+--kafka-username=${KAFKA_USERNAME} \
+--kafka-password=${KAFKA_PASSWORD} \
+--kafka-security-properties=${KAFKA_SECURITY_PROPERTIES} \
+--registry-url=${REGISTRY_URL} \
+--mgnt-username=${MANAGEMENT_USERNAME} \
+--mgnt-password=${MANAGEMENT_PASSWORD} \
+--topic=${TOPIC} \
+--event=${EVENT} \

@@ -122,7 +122,7 @@ public abstract class BaseSample {
    * @return {@code true} if the option is specified, {@code false} otherwise. 
    */
   protected boolean hasOption(String name) {
-    return commandLine == null ? false : commandLine.hasOption(name);
+    return commandLine != null && commandLine.hasOption(name);
   }
 
   /**

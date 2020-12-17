@@ -14,7 +14,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class EventStreamConsumer {
@@ -24,25 +24,36 @@ public class EventStreamConsumer {
 
     consumerProperties.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-    // Get a new KafkaConsumer (a connection to the schema registry is
-    // performed)
+    // Get a new KafkaConsumer (a connection to the schema registry is performed)
     try (KafkaConsumer<String, Object> consumer = new KafkaConsumer<>(consumerProperties)) {
 
       // Subscribe to the topic...
-      consumer.subscribe(Collections.singletonList(topic));
+      consumer.subscribe(Arrays.asList(topic));
 
       System.out.println("Kafka consumer listening for messages on topic '" + topic + "'");
       // Poll the topic to retrieve records
-      while (true) {
-        ConsumerRecords<String, Object> records = consumer.poll(Duration.ofSeconds(5));
+      int maxRetry = 24;
+      int retry = 0;
+      int durationSeconds = 5;
+      boolean recordFound = false;
+      int messages = 0;
+      while (retry < maxRetry) {
+        ConsumerRecords<String, Object> records = consumer.poll(Duration.ofSeconds(durationSeconds));
 
         records.forEach(rec -> System.out.printf("Received a message: offset: %d, partition: %d, key: %s, value: %s\n",
             rec.partition(), rec.offset(), rec.key(), rec.value()));
-
+        retry++;
         // stopping at first non empty record...
         if ( ! records.isEmpty()) {
+          recordFound = true;
+          messages = records.count();
           break;
         }
+      }
+      if ( ! recordFound) {
+        System.out.println("No record found after " + (retry * durationSeconds) + " seconds.");
+      } else {
+        System.out.println("Found " + messages + " message(s).");
       }
     }
   }

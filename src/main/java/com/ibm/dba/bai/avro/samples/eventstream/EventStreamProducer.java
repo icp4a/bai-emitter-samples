@@ -11,70 +11,68 @@ package com.ibm.dba.bai.avro.samples.eventstream;
 
 import static com.ibm.dba.bai.avro.samples.KafkaAvroProducerCommon.jsonToAvro;
 
-import com.ibm.eventstreams.serdes.SchemaInfo;
-import com.ibm.eventstreams.serdes.SchemaRegistry;
-import com.ibm.eventstreams.serdes.SchemaRegistryConfig;
-import com.ibm.eventstreams.serdes.exceptions.SchemaRegistryApiException;
-import com.ibm.eventstreams.serdes.exceptions.SchemaRegistryAuthException;
-import com.ibm.eventstreams.serdes.exceptions.SchemaRegistryConnectionException;
-import com.ibm.eventstreams.serdes.exceptions.SchemaRegistryServerErrorException;
+import com.ibm.dba.bai.avro.samples.ProducerCallback;
+
 import org.apache.avro.Schema;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
+import java.io.File;
+import java.util.HashMap;
 import java.util.Properties;
+import javax.ws.rs.WebApplicationException;
 
 public class EventStreamProducer {
+
   private final Properties props;
   private final String topic;
   private final String event;
-  private final String schemaName;
-  private final String schemaVersion;
+  private final String schemaPath;
 
-  public EventStreamProducer(Properties props, String topic, String event, String schemaName, String schemaVersion) {
+  public EventStreamProducer(Properties props, String topic, String event, String schemaPath) {
     this.props = props;
     this.topic = topic;
     this.event = event;
-    this.schemaName = schemaName;
-    this.schemaVersion = schemaVersion;
+    this.schemaPath = schemaPath;
   }
 
   /**
    * Sends an event given the arguments passed at construction time.
-   * @throws SchemaRegistryApiException possibly sent by the event stream SchemaRegistry
-   * @throws SchemaRegistryAuthException possibly sent by the event stream SchemaRegistry
-   * @throws NoSuchAlgorithmException possibly sent by the event stream SchemaRegistry
-   * @throws KeyManagementException possibly sent by the event stream SchemaRegistry
-   * @throws SchemaRegistryServerErrorException possibly sent by the event stream SchemaRegistry
-   * @throws SchemaRegistryConnectionException possibly sent by the event stream SchemaRegistry
+   * @return ProducerCallback to handle the response asynchronously or null
+   * @throws Exception any Exception that may occur
    * */
-  public void send() throws SchemaRegistryApiException, SchemaRegistryAuthException, NoSuchAlgorithmException,
-          KeyManagementException, SchemaRegistryServerErrorException, SchemaRegistryConnectionException {
+  public ProducerCallback send() throws Exception {
 
-    // Get a new connection to the Schema Registry
-    System.out.println("Connecting to the schema registry");
-    SchemaRegistry schemaRegistry = new SchemaRegistry(props);
-    // Get the schema from the registry
-    System.out.printf("Retrieving the schema with name = %s and version = %s\n", schemaName, schemaVersion);
-    SchemaInfo schema = schemaRegistry.getSchema(schemaName, schemaVersion);
-    final String schemaStr = schema.getSchema().toString();
-    System.out.println("Found a schema in the registry: " + schemaStr);
+    Schema.Parser schemaDefinitionParser = new Schema.Parser();//.setValidate(false).setValidateDefaults(false);
+    Schema schema = schemaDefinitionParser.parse(new File(schemaPath));
 
-    // Get a new specific KafkaProducer
-    try (KafkaProducer<String, Object> producer = new KafkaProducer<>(props)) {
-      final Schema schemaValue = new Schema.Parser().parse(schemaStr);
-      final Object specificRecord = jsonToAvro(event, schemaValue);
-      // Prepare the record, adding the Schema Registry headers
-      ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, specificRecord);
+    // the string event is supposed to be conformal to the schema
+    Object eventObject = jsonToAvro(event, schema);
+
+    KafkaProducer<String, Object> producer = new KafkaProducer<>(props);
+    ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, eventObject);
+    return doSend(producer, producerRecord);
+  }
   
-      producerRecord.headers().add(SchemaRegistryConfig.HEADER_MSG_SCHEMA_ID, schema.getIdAsBytes());
-      producerRecord.headers().add(SchemaRegistryConfig.HEADER_MSG_SCHEMA_VERSION, schema.getVersionAsBytes());
-  
-      // Send the record to Kafka
-      producer.send(producerRecord);
-      System.out.println("Sent event: " + event);
+  private ProducerCallback doSend(KafkaProducer<String, Object> producer,
+                                          ProducerRecord<String, Object> producerRecord) {
+    ProducerCallback callback = new ProducerCallback(producer);
+    try {
+      producer.send(producerRecord, callback);
+    } catch (WebApplicationException exc) {
+      System.out.println("Got a WebApplicationException as response : " + exc.getResponse().getStatus()
+              + " : " + exc.getMessage());
+      if (exc.getResponse().getStatus() == 404) {
+        System.out.println("Maybe the schema was not present in the schema registry");
+      }
+      producer.close();
+      return null;
+    } catch (Exception ex) {
+      System.out.println("Got an Exception while waiting for a response : " + ex.getMessage());
+      callback.getSentException().fillInStackTrace().printStackTrace();
+      producer.close();
+      return null;
     }
+    return callback;
   }
 }

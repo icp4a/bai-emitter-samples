@@ -1,24 +1,10 @@
 // This gradle file defines the dependencies of the samples.
 
-repositories {
-    // "fake" ivy repository to enable download of Eventstreams dependencies zip file when needed
-    ivy {
-        url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/eventstreams/'
-        patternLayout {
-            artifact '/[organisation]/[module]-[revision].zip'
-        }
-        metadataSources { artifact() }
-    }
-}
-
 dependencies {
-    // public download URL for Eventstreams dependencies zip file:
-    // https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/eventstreams/java-dependencies/dependencies-2.0.0-java.zip
-    implementation group: 'java-dependencies', name: 'dependencies', version: '2.0.0-java'
-    //def libDir = file("internal/libs")
-    implementation fileTree(dir: file("internal/libs"), include: '*.jar')
-    def avroSerializerVersion = '5.4.1'
+   // Eventstreams serdes 10.1.0 is now io.apicurio:apicurio-registry-utils-serde:1.3.1.Final :
+    def avroSerializerVersion = '5.5.1'
     implementation 'io.confluent:kafka-avro-serializer:'+ avroSerializerVersion
+    implementation group: 'io.apicurio', name: 'apicurio-registry-utils-serde', version: '1.3.1.Final'
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.4.1'
     implementation group: 'org.apache.kafka', name: 'kafka_2.12', version: '5.4.1-ccs'
     implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
@@ -32,21 +18,6 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.25.1'
     testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.10.6'
     testImplementation group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.1'
+    testImplementation group: 'io.apicurio', name: 'apicurio-registry-utils-serde', version: '1.3.1.Final'
 }
 
-task unzipEventStreams() {
-  doFirst{
-    // retrieve the path to the Eventstreams dependencies zip
-    def zipPath = project.configurations.compileClasspath.find { it.name.contains("dependencies") }
-    def libDir = new File("internal/libs")
-    libDir.mkdirs()
-    copy {
-        from zipTree(zipPath)
-        into libDir
-    }
-  }
-}
-
-compileJava {
-    dependsOn unzipEventStreams
-}
