@@ -5,7 +5,7 @@
    "name": "Employee",
    "fields": [
        {"name": "fName", "type": "string"},
-       {"name": "lName", "type": "string"},
+       {"name": "lName", "type": "string","ibm.automation.identifier": true},
        {"name": "age",  "type": "int"},
        {"name": "phoneNumber", "type": "string"}
    ]

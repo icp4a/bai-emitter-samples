@@ -21,7 +21,8 @@
           "fields": [
             {
               "name": "product_id",
-              "type": "string"
+              "type": "string",
+              "ibm.automation.identifier": true
             },
             {
               "name": "description",

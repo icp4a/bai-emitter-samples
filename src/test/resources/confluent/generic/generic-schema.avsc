@@ -20,6 +20,7 @@
           "type": "record",
           "fields": [
             {
+              "ibm.automation.identifier": true,
               "name": "product_id",
               "type": "string"
             },

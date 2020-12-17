@@ -5,7 +5,8 @@
   "fields": [
     {
       "name": "company",
-      "type": "string"
+      "type": "string",
+      "ibm.automation.identifier": true
     },
     {
       "name": "address",

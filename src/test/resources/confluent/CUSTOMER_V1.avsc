@@ -4,6 +4,7 @@
   "name": "Customer",
   "fields": [
     {
+      "ibm.automation.identifier": true,
       "name": "company",
       "type": "string"
     },
