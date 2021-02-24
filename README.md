@@ -63,11 +63,11 @@ You need:
 
 ## Confluent
 
-IBM Business Automation Insights for a Server allows you to run the Confluent Kafka and Schema Registry containers.
-This is the easiest way to run this sample with Confluent.
+When you use IBM Business Automation Insights in single server deployment mode, you can run the Confluent Kafka and Schema Registry containers.
+This is how you run this sample with Confluent.
 
 For Business Automation Insights to support your custom events, you need to configure how the events are routed from
-Kafka to Elasticsearch and, optionally, to HDFS by modifying the `config/flink/event-processor-config.yml`
+Kafka to Elasticsearch and, optionally, to HDFS, by modifying the `config/flink/event-processor-config.yml`
 configuration file, as explained
 [here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_proc.html)
 
@@ -104,7 +104,7 @@ configurations:
 
 In this example, Business Automation Insights forwards events from the `generic-schema-topic` Kafka topic to the
  `generic-schema-index` Elasticsearch index.  
-In this sample, we considered a best practice to use the same value for
+This sample considers that it is a best practice to use the same value for
  both Kafka topic and Elasticsearch parameters.
 
 ### Schema example
@@ -169,8 +169,8 @@ You can also find this schema [here](src/test/resources/confluent/generic/generi
 
 ### Schema registration
 
-The Avro schema must be registered in an Avro registry. It is used to validate and encode events.
-You do not need to directly access the schema registry to register the schema since this registration is the purpose  
+The Avro schema must be registered in an Avro registry. The schema validates and encodes events.
+You do not need to directly access the schema registry to register the schema because such registration is the purpose  
 of the management service.  
 For more information about the schema specification, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
 
@@ -209,7 +209,7 @@ You can find the corresponding file [here](src/test/resources/confluent/generic/
     - Set the Kafka credentials: `KAFKA_USERNAME=<kafka_user>` and `KAFKA_PASSWORD=<kafka_password>`
     - Set the management service credentials: `MANAGEMENT_USERNAME=<mngt_user>` and `MANAGEMENT_PASSWORD=<mngt_password>`
     - Set the management service URL: `MANAGEMENT_URL=https://localhost:6898`
-    - Set the kafka registry URL: `REGISTRY_URL=https://localhost:8084`
+    - Set the Kafka registry URL: `REGISTRY_URL=https://localhost:8084`
     - Set the event source file: `EVENT=src/test/resources/avro-sample-event.json`
     - Set the schema source file: `src/test/resources/confluent/generic/generic-schema.avsc`
     - Set the path to a Kafka security properties file:
@@ -217,7 +217,7 @@ You can find the corresponding file [here](src/test/resources/confluent/generic/
 3. Edit the Kafka security properties file, example:
   [kafka-security.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
 4. Compile the sample: `./gradlew clean jar`
-5. Run the sample: `bin/run-confluent-sample`. This produces an output similar to
+5. Run the sample: `bin/run-confluent-sample`. The output is similar to
   [this example output](#example-output)
 6. To verify that the event sent with the sample is processed by Business Automation Insights, check that the
   Elasticsearch index `generic-schema` is created, for example:
@@ -273,18 +273,18 @@ and send this binary payload.
 
 #### Retrieve a schema
 
-You can either retrieve a schema from a schema registry or by reading a schema from a `.avsc` file.
+You can retrieve a schema either from a schema registry or by reading the schema from a `.avsc` file.
 Retrieving a schema from the schema registry is not a feature that is used in the present samples because the schema
  definition is already known.  
 
 #### Java code to register a schema
 
-You upload a schema to the Confluent Avro registry thanks to the management service.  
+You upload a schema to the Confluent Avro registry through the management service.  
  The [management service](./src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java)
- needs an Elasticsearch index name, a schema name, and the schema itself as JSON string.  
+ needs an Elasticsearch index name, a schema name, and the schema itself as a JSON string.  
  This schema name defines both the subject used to retrieve a schema from the registry **and** the Kafka topic used to
  send an event.  
- Since the topic name is stored under an Elasticsearch index, a good naming convention is to use the same
+ Because the topic name is stored under an Elasticsearch index, a good naming convention is to use the same
  value for both the topic name and Elasticsearch index name.  
  The relationship between the subject and the topic is described here:
  [What is a topic versus a schema versus a subject?](https://docs.confluent.io/current/schema-registry/schema_registry_tutorial.html#terminology-review)
@@ -352,10 +352,10 @@ You can find this code in [ConfluentProducer](./src/main/java/com/ibm/dba/bai/av
 
 ## Event Streams
 
-IBM Business Automation Insights Kubernetes version allows you to run the IBM Event Streams Kafka implementation and its
+In Kubernetes deployment mode, IBM Business Automation Insights allows you to run the IBM Event Streams Kafka implementation and its
 registry.
 
-This is the easiest way to run this sample with IBM Event Streams.
+This is how you run this sample with IBM Event Streams.
 
 ### Avro schema example
 
@@ -417,10 +417,9 @@ For more information, see the following documentation pages:
 
 You can also find this schema [here](src/test/resources/eventstream/generic-v1.0.0.avsc).
 
-The Avro schema must be registered in an Avro registry. It is used to validate and encode events. As already detailed in
- the Confluent related chapter, the
- [management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client is in
- charge of this purpose.
+The Avro schema must be registered to an Avro registry. It is used to validate and encode events. As already indicated in
+ the Confluent related section, it is purpose of the
+ [management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client to operate such registration.
 For more information, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
 
 ### Corresponding event example
@@ -462,7 +461,7 @@ You can find the corresponding file [here](src/test/resources/eventstream/generi
     `EVENT_STREAMS_PROPERTIES=src/test/resources/eventstream/eventStream.properties`
     - Set the path to the schema definition file:  
     `SCHEMA=src/test/resources/eventstream/generic-v1.0.0.avsc`
-    - Set the management service url:  
+    - Set the management service URL:  
     `MANAGEMENT_URL=https://localhost:6898`
     - Set the management service registered username:  
     `MANAGEMENT_USERNAME=adminUser`
@@ -525,7 +524,7 @@ Found 1 messages.
 
 ### Java code to send an event with Event Streams
 
-You send an event in three steps: ensure the schema is registered in the events stream registry, convert the event to
+You send an event in three steps: ensure the schema is registered in the Event Streams registry, convert the event to
  binary and send this binary payload.
 
 #### Procedure to register a schema
@@ -581,11 +580,10 @@ The [test source code](./src/test) contains a [single class](./src/test/java/tes
 - event emission for IBM Event Streams
 - event emission for Confluent
 - schema registration
-- sending event using the jar (once built and present in the `build/libs` directory)
+- sending event by using the JAR file, after it is built and present in the `build/libs` directory
 
-The launch arguments are respectively read from [src/test/resources/tests/variables4Confluent.properties](./src/test/resources/tests/variables4Confluent.properties)
- and [src/test/resources/tests/variables4EventStream.properties](./src/test/resources/tests/variables4EventStream.properties)
- project resource properties files.  
-These properties files respectively have to contain the exact same property names as the [confluent.config](./confluent.config)
+The launch arguments are respectively read from the  [src/test/resources/tests/variables4Confluent.properties](./src/test/resources/tests/variables4Confluent.properties)
+ and [src/test/resources/tests/variables4EventStream.properties](./src/test/resources/tests/variables4EventStream.properties) properties files of the project resource.  
+These properties files respectively must contain the exact same property names as the [confluent.config](./confluent.config)
  and [eventstreams.config](./eventstreams.config) configuration files that are used when the executable JAR file of the
  samples is launched.
