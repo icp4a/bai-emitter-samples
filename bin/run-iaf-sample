@@ -3,16 +3,23 @@
 set -e
 SDIR=$(dirname $0)
 HOME_DIR=$(cd ${SDIR}/.. && pwd)
-ENV_FILE="${HOME_DIR}/eventstreams.config"
+ENV_FILE="${HOME_DIR}/iaf.config"
 
 source ${SDIR}/common
 source ${ENV_FILE}
 
 function check-all-vars-defined() {
 
-  check-var-defined "EVENT_STREAMS_PROPERTIES" ${EVENT_STREAMS_PROPERTIES}
-  check-var-defined "KAFKA_CLIENT_PROPERTIES" ${KAFKA_CLIENT_PROPERTIES}
+  check-var-defined "KAFKA_USERNAME" ${KAFKA_USERNAME}
+  check-var-defined "KAFKA_PASSWORD" ${KAFKA_PASSWORD}
+  check-var-defined "KAFKA_SECURITY_PROPERTIES" ${KAFKA_SECURITY_PROPERTIES}
   check-var-defined "TOPIC" ${TOPIC}
+
+  if [[ ${TOPIC} != "icp4ba-bai"* ]]; then
+    echo "The topic name must start with \"icp4ba-bai\", exiting."
+    exit 1
+  fi
+
   check-var-defined "EVENT" ${EVENT}
   check-var-defined "SCHEMA" ${SCHEMA}
   check-var-defined "MANAGEMENT_URL" ${MANAGEMENT_URL}
@@ -23,9 +30,10 @@ function check-all-vars-defined() {
 check-all-vars-defined
 
 java -cp ${JAR} \
-com.ibm.dba.bai.avro.samples.eventstream.EventStreamAvro \
---kafka-client-props=${KAFKA_CLIENT_PROPERTIES} \
---eventstream-props=${EVENT_STREAMS_PROPERTIES} \
+com.ibm.dba.bai.avro.samples.iaf.IAFSample \
+--kafka-username=${KAFKA_USERNAME} \
+--kafka-password=${KAFKA_PASSWORD} \
+--kafka-security-properties=${KAFKA_SECURITY_PROPERTIES} \
 --event=${EVENT} \
 --topic=${TOPIC} \
 --management-url=${MANAGEMENT_URL} \

@@ -5,11 +5,11 @@ The samples demonstrate how to:
 
 - Register an Avro schema.
 - Send to Business Automation Insights events that conform to the registered schema, by using either Confluent or
-  IBM Event Streams Avro APIs.
+  IBM Automation Foundation Avro APIs.
 
 Before sending events, you must configure Business Automation Insights to process custom events.
 For more information about such configuration, see the
-[IBM Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/con_bai_custom_events.html).
+[IBM Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/con_bai_custom_events.html).
 
 ## Table of contents
 
@@ -30,15 +30,16 @@ For more information about such configuration, see the
     - [Java code to register a schema](#java-code-to-register-a-schema)
     - [Java code to convert the event JSON payload to binary representation by using a schema](#java-code-to-convert-the-event-json-payload-to-binary-representation-by-using-a-schema)
     - [Java code to send an event as a binary payload](#java-code-to-send-an-event-as-a-binary-payload)
-- [Event Streams](#event-streams)
-  - [Avro schema example](#avro-schema-example)
-  - [Corresponding event example](#corresponding-event-example)
-  - [Running the Event Streams sample](#running-the-event-streams-sample)
-    - [Example output with Event Streams](#example-output-with-event-streams)
-  - [Java code to send an event with Event Streams](#java-code-to-send-an-event-with-event-streams)
-    - [Procedure to register a schema](#procedure-to-register-a-schema)
-    - [Convert the event JSON payload to binary representation by using a schema with Event Streams](#convert-the-event-json-payload-to-binary-representation-by-using-a-schema-with-event-streams)
-    - [Send an event as a binary payload with the Event Streams API](#send-an-event-as-a-binary-payload-with-the-event-streams-api)
+- [IBM Automation Foundation](#ibm-automation-foundation)
+  - [IBM Automation Foundation Avro schema example](#ibm-automation-foundation-avro-schema-example)
+  - [Corresponding IBM Automation Foundation event example](#corresponding-ibm-automation-foundation-event-example)
+  - [Running the IBM Automation Foundation sample](#running-the-ibm-automation-foundation-sample)
+    - [Example output with IBM Automation Foundation](#example-output-with-ibm-automation-foundation)
+  - [Java code to send an event with IBM Automation Foundation](#java-code-to-send-an-event-with-ibm-automation-foundation)
+    - [Procedure to register a schema with IBM Automation Foundation](#procedure-to-register-a-schema-with-ibm-automation-foundation)
+    - [Convert the event JSON payload to binary representation by using a schema with IBM Automation Foundation](#convert-the-event-json-payload-to-binary-representation-by-using-a-schema-with-ibm-automation-foundation)
+    - [Send an event as a binary payload with the IBM Automation Foundation API](#send-an-event-as-a-binary-payload-with-the-ibm-automation-foundation-api)
+- [Tests](#tests)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -56,20 +57,28 @@ You need:
 
 - IBM SDK, Java Technology Edition, Version 8
 - a .properties file for Kafka security configuration, such as
-  [kafka-security.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
-- Confluent Kafka 5.4.1
+  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
+- A Kafka installation: either  
+  - Confluent Kafka 5.4.1 coming with IBM Business Automation Insight (BAI) for a server
+  - IBM Automation Foundation (IAF) kafka coming with IBM BAI for Kubernetes
 - an Avro schema as an `.avsc` file (see the [schema example](#schema-example) below)
 - an event to send, as a file in JSON format (`.json` file) corresponding to the Avro schema
 
+There are pros and cons to use either (docker-compose or kubernetes) version of IBM BAI. The docker-compose version is
+lightweight due to its single server architecture, also, it comes with an embedded Confluent kafka you have the choice
+to use or to replace with your own, but scaling it imposes a restart of the platform. On the other hand, the kubernetes
+version is more complex to install but offers the inherent scalability of the platform.
+
 ## Confluent
 
-IBM Business Automation Insights for a Server allows you to run the Confluent Kafka and Schema Registry containers.
-This is the easiest way to run this sample with Confluent.
+When you use IBM Business Automation Insights in single server deployment mode,
+you can run the Confluent Kafka and Schema Registry containers.
+This is how you run this sample with Confluent.
 
 For Business Automation Insights to support your custom events, you need to configure how the events are routed from
-Kafka to Elasticsearch and, optionally, to HDFS by modifying the `config/flink/event-processor-config.yml`
+Kafka to Elasticsearch and, optionally, to HDFS, by modifying the `config/flink/event-processor-config.yml`
 configuration file, as explained
-[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_proc.html)
+[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_proc.html)
 
 Here is an example of the `event-processor-config.yml` file:
 
@@ -104,7 +113,7 @@ configurations:
 
 In this example, Business Automation Insights forwards events from the `generic-schema-topic` Kafka topic to the
  `generic-schema-index` Elasticsearch index.  
-In this sample, we considered a best practice to use the same value for
+This sample considers that it is a best practice to use the same value for
  both Kafka topic and Elasticsearch parameters.
 
 ### Schema example
@@ -162,15 +171,15 @@ NOTE: the `"ibm.automation.identifier": true` field attribute is optional and sp
 This attribute allows the user to create an identifier that can be used later for creating some monitoring sources.  
 For more information, see the following documentation pages:
 
-- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
-- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
+- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
+- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
 
 You can also find this schema [here](src/test/resources/confluent/generic/generic-schema.avsc).
 
 ### Schema registration
 
-The Avro schema must be registered in an Avro registry. It is used to validate and encode events.
-You do not need to directly access the schema registry to register the schema since this registration is the purpose  
+The Avro schema must be registered in an Avro registry. The schema validates and encodes events.
+You do not need to directly access the schema registry to register the schema because such registration is the purpose  
 of the management service.  
 For more information about the schema specification, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
 
@@ -209,15 +218,15 @@ You can find the corresponding file [here](src/test/resources/confluent/generic/
     - Set the Kafka credentials: `KAFKA_USERNAME=<kafka_user>` and `KAFKA_PASSWORD=<kafka_password>`
     - Set the management service credentials: `MANAGEMENT_USERNAME=<mngt_user>` and `MANAGEMENT_PASSWORD=<mngt_password>`
     - Set the management service URL: `MANAGEMENT_URL=https://localhost:6898`
-    - Set the kafka registry URL: `REGISTRY_URL=https://localhost:8084`
+    - Set the Kafka registry URL: `REGISTRY_URL=https://localhost:8084`
     - Set the event source file: `EVENT=src/test/resources/avro-sample-event.json`
     - Set the schema source file: `src/test/resources/confluent/generic/generic-schema.avsc`
     - Set the path to a Kafka security properties file:
     `KAFKA_SECURITY_PROPERTIES=src/test/resources/confluent/KafkaAvroProducer.properties`
 3. Edit the Kafka security properties file, example:
-  [kafka-security.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
+  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
 4. Compile the sample: `./gradlew clean jar`
-5. Run the sample: `bin/run-confluent-sample`. This produces an output similar to
+5. Run the sample: `bin/run-confluent-sample`. The output is similar to
   [this example output](#example-output)
 6. To verify that the event sent with the sample is processed by Business Automation Insights, check that the
   Elasticsearch index `generic-schema` is created, for example:
@@ -273,18 +282,18 @@ and send this binary payload.
 
 #### Retrieve a schema
 
-You can either retrieve a schema from a schema registry or by reading a schema from a `.avsc` file.
+You can retrieve a schema either from a schema registry or by reading the schema from a `.avsc` file.
 Retrieving a schema from the schema registry is not a feature that is used in the present samples because the schema
  definition is already known.  
 
 #### Java code to register a schema
 
-You upload a schema to the Confluent Avro registry thanks to the management service.  
+You upload a schema to the Confluent Avro registry through the management service.  
  The [management service](./src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java)
- needs an Elasticsearch index name, a schema name, and the schema itself as JSON string.  
+ needs an Elasticsearch index name, a schema name, and the schema itself as a JSON string.  
  This schema name defines both the subject used to retrieve a schema from the registry **and** the Kafka topic used to
  send an event.  
- Since the topic name is stored under an Elasticsearch index, a good naming convention is to use the same
+ Because the topic name is stored under an Elasticsearch index, a good naming convention is to use the same
  value for both the topic name and Elasticsearch index name.  
  The relationship between the subject and the topic is described here:
  [What is a topic versus a schema versus a subject?](https://docs.confluent.io/current/schema-registry/schema_registry_tutorial.html#terminology-review)
@@ -350,14 +359,18 @@ producer.send(record);
 
 You can find this code in [ConfluentProducer](./src/main/java/com/ibm/dba/bai/avro/samples/confluent/ConfluentProducer.java).
 
-## Event Streams
+## IBM Automation Foundation
 
-IBM Business Automation Insights Kubernetes version allows you to run the IBM Event Streams Kafka implementation and its
-registry.
+IBM Business Automation Insights Kubernetes version allows you to run the IBM Automation Foundation Kafka implementation
+and its registry.
 
-This is the easiest way to run this sample with IBM Event Streams.
+For Business Automation Insights Kubernetes version to support your custom events, you need to configure how the events
+are routed from Kafka to Elasticsearch as explained
+[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_proc.html)
 
-### Avro schema example
+This is the easiest way to run this sample with IBM Automation Foundation.
+
+### IBM Automation Foundation Avro schema example
 
 A schema is a structure in JSON format which is generally located in a `.avsc` file. Here is an example:
 
@@ -412,18 +425,18 @@ Insights.
 This attribute allows the user to create an identifier that can be used later for creating some monitoring sources.  
 For more information, see the following documentation pages:
 
-- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
-- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_20.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
+- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
+- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
 
-You can also find this schema [here](src/test/resources/eventstream/generic-v1.0.0.avsc).
+You can also find this schema [here](src/test/resources/iaf/generic-v1.0.0.avsc).
 
 The Avro schema must be registered in an Avro registry. It is used to validate and encode events. As already detailed in
- the Confluent related chapter, the
- [management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client is in
- charge of this purpose.
+the Confluent related chapter, the
+[management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client is in
+charge of this purpose.
 For more information, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
 
-### Corresponding event example
+### Corresponding IBM Automation Foundation event example
 
 The following event complies with the Avro schema that is presented in the previous section:
 
@@ -448,54 +461,63 @@ The following event complies with the Avro schema that is presented in the previ
 }
 ```
 
-You can find the corresponding file [here](src/test/resources/eventstream/generic-event.json).
+You can find the corresponding file [here](src/test/resources/iaf/generic-event.json).
 
-### Running the Event Streams sample
+### Running the IBM Automation Foundation sample
 
-1. Ensure that IBM Business Automation Insights is installed and IBM Event Streams is configured.
-1. Edit the [eventstreams.config](eventstreams.config) file.
-    - Set the topic name: `TOPIC=bai-ingress4samples-test`
-    - Set the event source file: `EVENT=src/test/resources/eventstream/generic-event.json`
-    - Set the path to a Kafka client properties file:
-    `KAFKA_CLIENT_PROPERTIES=src/test/resources/eventstream/kafkaProducer.properties`
-    - Set the path to an Event Streams configuration properties file:
-    `EVENT_STREAMS_PROPERTIES=src/test/resources/eventstream/eventStream.properties`
+1. Ensure that IBM Business Automation Insights is installed and IBM Automation Foundation is configured.
+1. Edit the [iaf.config](iaf.config) file.
+
+    - Set the topic name (important note: the topic name must start with `icp4ba-bai`):  
+      `TOPIC=icp4ba-bai-ingress4samples-test`
+    - Set the event source file: `EVENT=src/test/resources/iaf/generic-event.json`
+    - Set the kafka username of you BAI installation:  
+      `KAFKA_USERNAME=kafka_user`
+    - Set the corresponding kafka password of your BAI installation:  
+      `KAFKA_PASSWORD=aPassw0rd`
+    - Set the path to a Kafka client security properties file:
+      `KAFKA_SECURITY_PROPERTIES=src/test/resources/iaf/kafkaProducer.properties`
     - Set the path to the schema definition file:  
-    `SCHEMA=src/test/resources/eventstream/generic-v1.0.0.avsc`
-    - Set the management service url:  
-    `MANAGEMENT_URL=https://localhost:6898`
+      `SCHEMA=src/test/resources/iaf/generic-v1.0.0.avsc`
+    - Set the Business Automation Insight (BAI) management service url:  
+      `MANAGEMENT_URL=https://localhost:6898`
     - Set the management service registered username:  
-    `MANAGEMENT_USERNAME=adminUser`
+      `MANAGEMENT_USERNAME=adminUser`
     - Set the management service user password:  
-    `MANAGEMENT_URL=user-password`
+      `MANAGEMENT_PASSWORD=user-password`
 
-1. Edit the Kafka client properties file, example: [kafka-client-config.properties](./src/test/resources/eventstream/kafkaProducer.properties)
-1. Edit the Event Streams configuration properties file, example: [eventstreams-config.properties](./src/test/resources/eventstream/eventStream.properties)
+1. Edit the Kafka client properties file, example: [kafkaProducer.properties](./src/test/resources/iaf/kafkaProducer.properties)
 1. Compile the sample: `./gradlew clean jar`
-1. Run the sample: `bin/run-eventstreams-sample`. This produces an output similar to [this example output](#example-output-with-event-streams)
-1. Check that the Elasticsearch index `bai-ingress4samples-test` (corresponding to the above topic) is created in the
-    Event Streams environment:
+1. Run the sample: `bin/run-iaf-sample`. This produces an output similar to [this example output](#example-output-with-iaf)
+1. Check that the Elasticsearch index `icp4ba-bai-ingress4samples-test` (corresponding to the above topic) is created in
+   the IBM Automation Foundation environment:
 
   ```sh
   export ES_USER=admin
   export ES_PASSWORD=passw0rd
   export ES_CLIENT_POD=$(kubectl get pods -o custom-columns=Name:.metadata.name --no-headers --selector=chart=ibm-dba-ek,role=client)
   export ES_URL=https://localhost:9200
-  kubectl exec -it ${ES_CLIENT_POD} -- curl -u ${ES_USER}:${ES_PASSWORD} -k ${ES_URL}/_cat/indices/bai-ingress4samples-test?h=index,docs.count\&v
+  kubectl exec -it ${ES_CLIENT_POD} -- curl -u ${ES_USER}:${ES_PASSWORD} -k ${ES_URL}/_cat/indices/icp4ba-bai-ingress4samples-test?h=index,docs.count\&v
   ```
 
-#### Example output with Event Streams
+#### Example output with IBM Automation Foundation
 
 ```text
-EVENT_STREAMS_PROPERTIES is src/test/resources/eventstream/eventStream.properties
-KAFKA_CLIENT_PROPERTIES is src/test/resources/eventstream/kafkaProducer.properties
-TOPIC is ocp-ads-generic-event-sample-test
-EVENT is src/test/resources/eventstream/generic-event.json
-SCHEMA is src/test/resources/eventstream/generic-v1.0.0.avsc
-MANAGEMENT_URL is https://management.bai.apps.ocp-ads.os.fyre.ibm.com
+KAFKA_USERNAME is icp4ba-kafka-auth
+KAFKA_PASSWORD is **********
+KAFKA_SECURITY_PROPERTIES is src/test/resources/iaf/KafkaProducer.properties
+TOPIC is icp4ba-bai-testkit-custom-event
+EVENT is src/test/resources/iaf/generic-event.json
+SCHEMA is src/test/resources/iaf/generic-v1.0.0.avsc
+MANAGEMENT_URL is https://management.bai.apps.bai-ocp-test.cp.fyre.ibm.com
 MANAGEMENT_USERNAME is admin
 MANAGEMENT_PASSWORD is **********
-Schema src/test/resources/eventstream/generic-v1.0.0.avsc successfully registered
+Using default value of "*********" for property name "sasl.jaas.config"
+topics: [icp4ba-bai-1, icp4ba-bai-2, icp4ba-bai-ingress4samples-test]
+topic 'icp4ba-bai-ingress4samples-test' already exist, not creating it
+configuring topic 'icp4ba-bai-ingress4samples-test'
+adding 120s message retention duration
+Schema src/test/resources/iaf/generic-v1.0.0.avsc successfully registered
 Sent event: {
   "order": "13d478-36e",
   "total_price": 500,
@@ -515,24 +537,23 @@ Sent event: {
   ]
 }
 
-Kafka consumer listening for messages on topic 'ocp-ads-generic-event-sample-test'
-Received a message: offset: 0, partition: 1, key: null, value: {"order": "13d478-36e", "total_price": 500, "products":
+Kafka consumer listening for messages on topic 'icp4ba-bai-ingress4samples-test'
+Received a message: offset: 0, partition: 11, key: null, value: {"order": "13d478-36e", "total_price": 500, "products":
  [{"product_id": "First product", "description": null, "quantity": 1}, {"product_id": "Second product", "description":
- "Fragile", "quantity": 2}]}
-Found 1 messages.
-
+  "Fragile", "quantity": 2}]}
+Found 1 message(s).
 ```
 
-### Java code to send an event with Event Streams
+### Java code to send an event with IBM Automation Foundation
 
-You send an event in three steps: ensure the schema is registered in the events stream registry, convert the event to
- binary and send this binary payload.
+You send an event in three steps: ensure the schema is registered in the IBM Automation Foundation registry, convert
+the event to binary and send this binary payload.
 
-#### Procedure to register a schema
+#### Procedure to register a schema with IBM Automation Foundation
 
 Follow the procedure described in the [Java code to register a schema](#java-code-to-register-a-schema) section.
 
-#### Convert the event JSON payload to binary representation by using a schema with Event Streams
+#### Convert the event JSON payload to binary representation by using a schema with IBM Automation Foundation
 
 ```java
 GenericDatumReader<GenericRecord> reader = new GenericDatumReader<>(schema)
@@ -548,7 +569,7 @@ You can find this code in
 [KafkaAvroProducerCommon](./src/main/java/com/ibm/dba/bai/avro/samples/KafkaAvroProducerCommon.java)
 in the sample code.
 
-#### Send an event as a binary payload with the Event Streams API
+#### Send an event as a binary payload with the IBM Automation Foundation API
 
 ```java
 Properties props = ....;
@@ -571,21 +592,25 @@ producer.send(producerRecord);
 ```
 
 You can find this kind of code in
- [EventStreamProducer.java](./src/main/java/com/ibm/dba/bai/avro/samples/eventstream/EventStreamProducer.java).
+[IAFProducer.java](./src/main/java/com/ibm/dba/bai/avro/samples/iaf/IAFProducer.java).
 
-### Tests
+## Tests
 
 For development work, you can directly run event emission, for both supported platforms, from your preferred IDE.  
 The [test source code](./src/test) contains a [single class](./src/test/java/tests/SampleTests.java) allowing you to test:
 
-- event emission for IBM Event Streams
+- event emission for IBM Automation Foundation
 - event emission for Confluent
 - schema registration
 - sending event using the jar (once built and present in the `build/libs` directory)
 
-The launch arguments are respectively read from [src/test/resources/tests/variables4Confluent.properties](./src/test/resources/tests/variables4Confluent.properties)
- and [src/test/resources/tests/variables4EventStream.properties](./src/test/resources/tests/variables4EventStream.properties)
+The launch arguments are respectively read from
+ [src/test/resources/tests/variables4Confluent.properties](./src/test/resources/tests/variables4Confluent.properties) or
+ [src/test/resources/tests/variables4IAF.properties](./src/test/resources/tests/variables4IAF.properties)
  project resource properties files.  
-These properties files respectively have to contain the exact same property names as the [confluent.config](./confluent.config)
- and [eventstreams.config](./eventstreams.config) configuration files that are used when the executable JAR file of the
+These properties files respectively have to contain the exact same property names as the
+[confluent.config](./confluent.config) or
+ [iaf.config](./iaf.config)
+configuration files that are used when the executable JAR file of the
+
  samples is launched.

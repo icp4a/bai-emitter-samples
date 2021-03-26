@@ -1,7 +1,7 @@
 /**
  * Licensed Materials - Property of IBM
  *  5737-I23
- *  Copyright IBM Corp. 2020. All Rights Reserved.
+ *  Copyright IBM Corp. 2021. All Rights Reserved.
  *  U.S. Government Users Restricted Rights:
  *  Use, duplication or disclosure restricted by GSA ADP Schedule
  *  Contract with IBM Corp.
@@ -69,6 +69,8 @@ public class ManagementServiceClient {
       int regStatus = res.findValue("services").get(1).findValue("status").intValue();
       rtn = res.findValue("status").intValue() == 0 && esStatus == 200 && regStatus == 200;
     } catch (IOException exc) {
+      System.out.println("The management service is not available for the below reason:");
+      exc.fillInStackTrace().printStackTrace();
       return false;
     }
     return rtn;
