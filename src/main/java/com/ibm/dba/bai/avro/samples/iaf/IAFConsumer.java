@@ -1,13 +1,13 @@
 /**
  * Licensed Materials - Property of IBM
  *  5737-I23
- *  Copyright IBM Corp. 2020. All Rights Reserved.
+ *  Copyright IBM Corp. 2021. All Rights Reserved.
  *  U.S. Government Users Restricted Rights:
  *  Use, duplication or disclosure restricted by GSA ADP Schedule
  *  Contract with IBM Corp.
  */
 
-package com.ibm.dba.bai.avro.samples.eventstream;
+package com.ibm.dba.bai.avro.samples.iaf;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -17,10 +17,11 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
-public class EventStreamConsumer {
-  public EventStreamConsumer(Properties consumerProperties, String topic) {
+public class IAFConsumer {
+
+  public IAFConsumer(Properties consumerProperties, String topic) {
     // Set the consumer group ID in the properties
-    consumerProperties.putIfAbsent("group.id", "consumer" + Math.random());
+    consumerProperties.putIfAbsent("group.id", "icp4ba-bai");
 
     consumerProperties.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
@@ -57,4 +58,5 @@ public class EventStreamConsumer {
       }
     }
   }
+
 }
