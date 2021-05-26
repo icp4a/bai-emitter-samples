@@ -59,15 +59,17 @@ You need:
 - a .properties file for Kafka security configuration, such as
   [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
 - A Kafka installation: either  
-  - Confluent Kafka 5.4.1 coming with IBM Business Automation Insight (BAI) for a server
-  - IBM Automation Foundation (IAF) kafka coming with IBM BAI for Kubernetes
+  - Confluent Kafka 5.4.1 coming with IBM Business Automation Insight for a server
+  - IBM Automation Foundation (IAF) Kafka coming with IBM Business Automation Insights for Kubernetes
 - an Avro schema as an `.avsc` file (see the [schema example](#schema-example) below)
 - an event to send, as a file in JSON format (`.json` file) corresponding to the Avro schema
 
-There are pros and cons to use either (docker-compose or kubernetes) version of IBM BAI. The docker-compose version is
-lightweight due to its single server architecture, also, it comes with an embedded Confluent kafka you have the choice
-to use or to replace with your own, but scaling it imposes a restart of the platform. On the other hand, the kubernetes
-version is more complex to install but offers the inherent scalability of the platform.
+One benefit of using the docker-compose packaging of IBM Business Automation Insights is that this deployment mode is
+ lightweight because of its single server architecture. One additional benefit is that it comes with an embedded
+ Confluent Kafka distribution, which you can either use as is or replace with your own. Also, be aware that if you
+ scale a single server deployment, you must restart the platform.
+On the other hand, the Kubernetes deployment mode is more complex to install but offers the inherent
+scalability and high availability of the platform.
 
 ## Confluent
 
@@ -127,6 +129,11 @@ A schema is a structure in JSON format which is generally located in a `.avsc` f
   "namespace": "com.ibm.bai",
   "fields": [
     {
+      "name": "timestamp",
+      "logicalType": "timestamp-millis",
+      "type": "long"
+    },
+    {
       "name": "order",
       "type": "string"
     },
@@ -171,8 +178,8 @@ NOTE: the `"ibm.automation.identifier": true` field attribute is optional and sp
 This attribute allows the user to create an identifier that can be used later for creating some monitoring sources.  
 For more information, see the following documentation pages:
 
-- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
-- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
+- [Business Automation Insights for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
+- [Business Automation Insights for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
 
 You can also find this schema [here](src/test/resources/confluent/generic/generic-schema.avsc).
 
@@ -189,6 +196,7 @@ The following event complies with the Avro schema that is presented in the previ
 
 ```json
 {
+  "timestamp": 27,
   "order": "3d478-36e",
   "total_price": 500,
   "products": [
@@ -248,6 +256,7 @@ EVENT is src/test/resources/confluent/generic/event-4-generic.json
 REGISTRY_URL is https://localhost:8084
 Schema src/test/resources/confluent/generic/generic-schema.avsc successfully registered
 Sent event: {
+  "timestamp": 27,
   "order": "3d478-36e",
   "total_price": 500,
   "products": [
@@ -268,7 +277,8 @@ Sent event: {
 
 Listening for messages on Kafka topic 'generic-schema'
 Waiting for message ...
-Received a message: offset: 0, partition: 26, key: null, value: {"order": "3d478-36e", "total_price": 500,
+Received a message: offset: 0, partition: 26, key: null, value: {"timestamp": 27,
+"order": "3d478-36e", "total_price": 500,
 "products": [{"product_id": "First product", "description": null, "quantity": 1}, {"product_id": "Second product",
 "description": "Fragile", "quantity": 2}]}
 1 message(s) found
@@ -361,12 +371,12 @@ You can find this code in [ConfluentProducer](./src/main/java/com/ibm/dba/bai/av
 
 ## IBM Automation Foundation
 
-IBM Business Automation Insights Kubernetes version allows you to run the IBM Automation Foundation Kafka implementation
-and its registry.
+IBM Business Automation Insights Kubernetes deployment mode allows you to run the IBM Automation Foundation Kafka
+implementation and its registry.
 
-For Business Automation Insights Kubernetes version to support your custom events, you need to configure how the events
-are routed from Kafka to Elasticsearch as explained
-[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_proc.html)
+For Business Automation Insights Kubernetes deployment mode to support your custom events, you need to configure how the
+events are routed from Kafka to Elasticsearch as explained
+[here](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=events-event-forwarder)
 
 This is the easiest way to run this sample with IBM Automation Foundation.
 
@@ -425,13 +435,13 @@ Insights.
 This attribute allows the user to create an identifier that can be used later for creating some monitoring sources.  
 For more information, see the following documentation pages:
 
-- [BAI for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
-- [BAI for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
+- [Business Automation Insights for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
+- [Business Automation Insights for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
 
 You can also find this schema [here](src/test/resources/iaf/generic-v1.0.0.avsc).
 
-The Avro schema must be registered in an Avro registry. It is used to validate and encode events. As already detailed in
-the Confluent related chapter, the
+The Avro schema must be registered in an Avro registry. It is used to validate and encode events. As already detailed
+in the Confluent related chapter, the
 [management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client is in
 charge of this purpose.
 For more information, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
@@ -467,30 +477,32 @@ You can find the corresponding file [here](src/test/resources/iaf/generic-event.
 
 1. Ensure that IBM Business Automation Insights is installed and IBM Automation Foundation is configured.
 1. Edit the [iaf.config](iaf.config) file.
-
     - Set the topic name (important note: the topic name must start with `icp4ba-bai`):  
       `TOPIC=icp4ba-bai-ingress4samples-test`
     - Set the event source file: `EVENT=src/test/resources/iaf/generic-event.json`
-    - Set the kafka username of you BAI installation:  
+    - Set the Kafka username of your Business Automation Insights installation. The [documentation](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=data-retrieving-kafka-username-password)
+provides a way to retrieve this information.  
       `KAFKA_USERNAME=kafka_user`
-    - Set the corresponding kafka password of your BAI installation:  
+    - Set the corresponding Kafka password of your Business Automation Insights installation:  
       `KAFKA_PASSWORD=aPassw0rd`
     - Set the path to a Kafka client security properties file:
       `KAFKA_SECURITY_PROPERTIES=src/test/resources/iaf/kafkaProducer.properties`
     - Set the path to the schema definition file:  
       `SCHEMA=src/test/resources/iaf/generic-v1.0.0.avsc`
-    - Set the Business Automation Insight (BAI) management service url:  
-      `MANAGEMENT_URL=https://localhost:6898`
-    - Set the management service registered username:  
+    - Set the Business Automation Insights management service URL. The
+host of the URL is the Management route.
+      `MANAGEMENT_URL=https://bai-management-bai.apps.my-domain.com`
+    - Set the management service registered username. The [documentation](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=indexes-rolling-over-that-store-active-summaries)
+     provides a way to obtain this information.  
       `MANAGEMENT_USERNAME=adminUser`
     - Set the management service user password:  
       `MANAGEMENT_PASSWORD=user-password`
 
-1. Edit the Kafka client properties file, example: [kafkaProducer.properties](./src/test/resources/iaf/kafkaProducer.properties)
+1. Edit the Kafka client properties file, for example: [kafkaProducer.properties](./src/test/resources/iaf/kafkaProducer.properties).
 1. Compile the sample: `./gradlew clean jar`
 1. Run the sample: `bin/run-iaf-sample`. This produces an output similar to [this example output](#example-output-with-iaf)
-1. Check that the Elasticsearch index `icp4ba-bai-ingress4samples-test` (corresponding to the above topic) is created in
-   the IBM Automation Foundation environment:
+1. Check that the Elasticsearch index `icp4ba-bai-ingress4samples-test` (corresponding to the above topic) is created
+in the IBM Automation Foundation environment:
 
   ```sh
   export ES_USER=admin
