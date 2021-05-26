@@ -1,4 +1,5 @@
 {
+  "timestamp": 645,
   "order": "3d478-36e",
   "total_price": 500,
   "products": [
@@ -10,7 +11,7 @@
     {
       "product_id": "Second product",
       "description": {
-    	"string": "Fragile"  
+    	"string": "Fragile"
       },
       "quantity": 2
     }

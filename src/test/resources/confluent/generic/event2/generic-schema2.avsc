@@ -4,6 +4,11 @@
   "namespace": "com.ibm.bai",
   "fields": [
     {
+      "name": "timestamp",
+      "logicalType": "timestamp-millis",
+      "type": "long"
+    },
+    {
       "name": "order",
       "type": "string"
     },
