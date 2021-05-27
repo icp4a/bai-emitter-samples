@@ -56,13 +56,13 @@ These entry points are used by the launch scripts.
 You need:
 
 - IBM SDK, Java Technology Edition, Version 8
-- a .properties file for Kafka security configuration, such as
-  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
+- A .properties file for Kafka security configuration, such as
+  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties).
 - A Kafka installation: either  
-  - Confluent Kafka 5.4.1 coming with IBM Business Automation Insight for a server
+  - Confluent Kafka 5.4.1 coming with IBM Business Automation Insights for a server
   - IBM Automation Foundation (IAF) Kafka coming with IBM Business Automation Insights for Kubernetes
-- an Avro schema as an `.avsc` file (see the [schema example](#schema-example) below)
-- an event to send, as a file in JSON format (`.json` file) corresponding to the Avro schema
+- An Avro schema as an `.avsc` file (see the [schema example](#schema-example) below)
+- An event to send, such as a file in JSON format (`.json` file) corresponding to the Avro schema
 
 One benefit of using the docker-compose packaging of IBM Business Automation Insights is that this deployment mode is
  lightweight because of its single server architecture. One additional benefit is that it comes with an embedded
@@ -80,7 +80,7 @@ This is how you run this sample with Confluent.
 For Business Automation Insights to support your custom events, you need to configure how the events are routed from
 Kafka to Elasticsearch and, optionally, to HDFS, by modifying the `config/flink/event-processor-config.yml`
 configuration file, as explained
-[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_proc.html)
+[here](https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_proc.html).
 
 Here is an example of the `event-processor-config.yml` file:
 
@@ -178,8 +178,8 @@ NOTE: the `"ibm.automation.identifier": true` field attribute is optional and sp
 This attribute allows the user to create an identifier that can be used later for creating some monitoring sources.  
 For more information, see the following documentation pages:
 
-- [Business Automation Insights for server related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
-- [Business Automation Insights for Kubernetes related documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
+- [Business Automation Insights for server documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_sn_cust_event_config_monitsource.html)
+- [Business Automation Insights for Kubernetes documentation]( https://www.ibm.com/support/knowledgecenter/SSYHZ8_21.0.x/com.ibm.dba.bai/topics/tsk_bai_k8s_cust_event_config_monitsource.html)
 
 You can also find this schema [here](src/test/resources/confluent/generic/generic-schema.avsc).
 
@@ -232,10 +232,10 @@ You can find the corresponding file [here](src/test/resources/confluent/generic/
     - Set the path to a Kafka security properties file:
     `KAFKA_SECURITY_PROPERTIES=src/test/resources/confluent/KafkaAvroProducer.properties`
 3. Edit the Kafka security properties file, example:
-  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties)
+  [KafkaAvroProducer.properties](./src/test/resources/confluent/KafkaAvroProducer.properties).
 4. Compile the sample: `./gradlew clean jar`
 5. Run the sample: `bin/run-confluent-sample`. The output is similar to
-  [this example output](#example-output)
+  [this example output](#example-output).
 6. To verify that the event sent with the sample is processed by Business Automation Insights, check that the
   Elasticsearch index `generic-schema` is created, for example:
   `curl -X GET -u <admin_user>:<admin_password> -k https://localhost:"$ELASTICSEARCH_PORT"/_cat/indices/generic-schema?h=index,
@@ -306,7 +306,7 @@ You upload a schema to the Confluent Avro registry through the management servic
  Because the topic name is stored under an Elasticsearch index, a good naming convention is to use the same
  value for both the topic name and Elasticsearch index name.  
  The relationship between the subject and the topic is described here:
- [What is a topic versus a schema versus a subject?](https://docs.confluent.io/current/schema-registry/schema_registry_tutorial.html#terminology-review)
+ [What is a topic versus a schema versus a subject?](https://docs.confluent.io/current/schema-registry/schema_registry_tutorial.html#terminology-review).
 
 This sample uses the
 [Confluent default name strategy](https://docs.confluent.io/current/schema-registry/serdes-develop/index.html#sr-schemas-subject-name-strategy)
@@ -376,7 +376,7 @@ implementation and its registry.
 
 For Business Automation Insights Kubernetes deployment mode to support your custom events, you need to configure how the
 events are routed from Kafka to Elasticsearch as explained
-[here](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=events-event-forwarder)
+[here](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=events-event-forwarder).
 
 This is the easiest way to run this sample with IBM Automation Foundation.
 
@@ -442,7 +442,7 @@ You can also find this schema [here](src/test/resources/iaf/generic-v1.0.0.avsc)
 
 The Avro schema must be registered in an Avro registry. It is used to validate and encode events. As already detailed
 in the Confluent related chapter, the
-[management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) client is in
+[management service client](src/main/java/com/ibm/dba/bai/avro/samples/ManagementServiceClient.java) is in
 charge of this purpose.
 For more information, see the [Avro schema specification](https://avro.apache.org/docs/current/spec.html).
 
@@ -480,7 +480,7 @@ You can find the corresponding file [here](src/test/resources/iaf/generic-event.
     - Set the topic name (important note: the topic name must start with `icp4ba-bai`):  
       `TOPIC=icp4ba-bai-ingress4samples-test`
     - Set the event source file: `EVENT=src/test/resources/iaf/generic-event.json`
-    - Set the Kafka username of your Business Automation Insights installation. The [documentation](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=data-retrieving-kafka-username-password)
+    - Set the Kafka username of your Business Automation Insights installation. The [documentation](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=data-retrieving-kafka-username-password).
 provides a way to retrieve this information.  
       `KAFKA_USERNAME=kafka_user`
     - Set the corresponding Kafka password of your Business Automation Insights installation:  
@@ -614,15 +614,14 @@ The [test source code](./src/test) contains a [single class](./src/test/java/tes
 - event emission for IBM Automation Foundation
 - event emission for Confluent
 - schema registration
-- sending event using the jar (once built and present in the `build/libs` directory)
+- sending event using the jar (after it is built and available in the `build/libs` directory)
 
-The launch arguments are respectively read from
+The launch arguments are read from the properties files
  [src/test/resources/tests/variables4Confluent.properties](./src/test/resources/tests/variables4Confluent.properties) or
- [src/test/resources/tests/variables4IAF.properties](./src/test/resources/tests/variables4IAF.properties)
- project resource properties files.  
-These properties files respectively have to contain the exact same property names as the
+ [src/test/resources/tests/variables4IAF.properties](./src/test/resources/tests/variables4IAF.properties).  
+These properties files must contain the exact same property names as,
+respectively the
 [confluent.config](./confluent.config) or
  [iaf.config](./iaf.config)
-configuration files that are used when the executable JAR file of the
-
- samples is launched.
+configuration files which are used when the executable JAR file of the
+ samples is started.
